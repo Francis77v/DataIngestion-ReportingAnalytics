@@ -1,9 +1,9 @@
-﻿using Backend.Models;
+﻿using Backend.Domains;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Infrastructure.Context;
 
-public partial class MyDbContext : DbContext
+public class MyDbContext : DbContext
 {
     public MyDbContext()
     {
@@ -20,20 +20,23 @@ public partial class MyDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        OnModelCreatingPartial(modelBuilder);
-        
         modelBuilder.Entity<StagingImport>(entity =>
         {
             entity.ToTable("staging_imports");
             entity.HasKey(e => e.Id);
-            entity.Property(e => e.RawData)
-                .HasColumnType("jsonb");
             entity.Property(e => e.Processed)
                 .HasDefaultValue(false);
             entity.Property(e => e.ImportedAt)
                 .HasDefaultValueSql("NOW()");
         });
+
+        modelBuilder.Entity<Client>()
+            .HasOne(c => c.CaseNavigation)
+            .WithOne(c => c.ClientNavigation)
+            .HasForeignKey<Case>(c => c.Id)
+            .IsRequired();
+        
     }
 
-    partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+ 
 }
