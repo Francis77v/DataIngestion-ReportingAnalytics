@@ -1,9 +1,12 @@
 ﻿using Backend.Domains;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+
 
 namespace Backend.Infrastructure.Context;
 
-public class MyDbContext : DbContext
+public class MyDbContext : IdentityDbContext<ApplicationUser, IdentityRole, string>
 {
     public MyDbContext()
     {
@@ -17,9 +20,11 @@ public class MyDbContext : DbContext
     public DbSet<StagingImport> StagingImports { get; set; }
     public DbSet<Client> Clients { get; set; }
     public DbSet<Case> Cases { get; set; }
+    public DbSet<ApplicationUser> ApplicationUsers { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
         modelBuilder.Entity<StagingImport>(entity =>
         {
             entity.ToTable("staging_imports");
@@ -35,7 +40,11 @@ public class MyDbContext : DbContext
             .WithOne(c => c.ClientNavigation)
             .HasForeignKey<Case>(c => c.Id)
             .IsRequired();
-        
+
+        // modelBuilder.Entity<ApplicationUser>(entity =>
+        // {
+        //     entity.HasKey()
+        // });
     }
 
  
