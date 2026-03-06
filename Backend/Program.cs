@@ -20,6 +20,10 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<MyDbContext>()
     .AddDefaultTokenProviders();
 
+//REGISTER MEDIATR
+builder.Services.AddMediatR(cfg => 
+    cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
