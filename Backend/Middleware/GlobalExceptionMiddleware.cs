@@ -1,74 +1,52 @@
-using System.Net;
-using FluentValidation;
-using System.Text.Json;
+using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Middleware;
 
-public class GlobalExceptionMiddleware
+public class GlobalExceptionHandler : IExceptionHandler
 {
-    private readonly RequestDelegate _next;
-    private readonly ILogger<GlobalExceptionMiddleware> _logger;
+    private readonly ILogger<GlobalExceptionHandler> _logger;
 
-    public GlobalExceptionMiddleware(
-        RequestDelegate next,
-        ILogger<GlobalExceptionMiddleware> logger)
+    public GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger)
     {
-        _next = next;
         _logger = logger;
     }
 
-    public async Task InvokeAsync(HttpContext context)
+    public async ValueTask<bool> TryHandleAsync(
+        HttpContext httpContext,
+        Exception exception,
+        CancellationToken cancellationToken)
     {
-        try
-        {
-            await _next(context);
-        }
-        catch (ValidationException ex)
-        {
-            await HandleValidationException(context, ex);
-        }
-        catch (Exception ex)
-        {
-            await HandleGeneralException(context, ex);
-        }
-    }
+        _logger.LogError(
+            exception, "Exception occurred: {Message}", exception.Message);
 
-    private static async Task HandleValidationException(
-        HttpContext context,
-        ValidationException ex)
-    {
-        context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
-        context.Response.ContentType = "application/json";
+        var (statusCode, title) = MapException(exception);
 
-        var errors = ex.Errors.Select(e => new
+        var problemDetails = new ProblemDetails
         {
-            field = e.PropertyName,
-            message = e.ErrorMessage
-        });
-
-        var response = new
-        {
-            message = "Validation failed",
-            errors
+            Status = statusCode,
+            Title = title,
+            Detail = exception.Message
         };
 
-        await context.Response.WriteAsync(JsonSerializer.Serialize(response));
+        httpContext.Response.StatusCode = statusCode;
+
+        await httpContext.Response
+            .WriteAsJsonAsync(problemDetails, cancellationToken);
+
+        return true;
     }
 
-    private async Task HandleGeneralException(
-        HttpContext context,
-        Exception ex)
-    {
-        _logger.LogError(ex, "Unhandled exception occurred");
-
-        context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-        context.Response.ContentType = "application/json";
-
-        var response = new
+    private static (int StatusCode, string Title) MapException(Exception exception) =>
+        exception switch
         {
-            message = "An unexpected error occurred"
+            ArgumentNullException      => (StatusCodes.Status400BadRequest,        "Bad Request"),
+            ArgumentException          => (StatusCodes.Status400BadRequest,        "Bad Request"),
+            UnauthorizedAccessException => (StatusCodes.Status401Unauthorized,     "Unauthorized"),
+            KeyNotFoundException       => (StatusCodes.Status404NotFound,          "Not Found"),
+            NotImplementedException    => (StatusCodes.Status501NotImplemented,    "Not Implemented"),
+            OperationCanceledException => (StatusCodes.Status499ClientClosedRequest, "Client Closed Request"),
+            TimeoutException           => (StatusCodes.Status504GatewayTimeout,   "Gateway Timeout"),
+            _                          => (StatusCodes.Status500InternalServerError, "Server Error")
         };
-
-        await context.Response.WriteAsync(JsonSerializer.Serialize(response));
-    }
 }
