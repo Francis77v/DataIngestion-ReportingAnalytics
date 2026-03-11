@@ -1,13 +1,15 @@
-using Backend.Domains;
-using Backend.Features.Users.CreateUsers;
+using Backend.Api.Middleware.Endpoints;
+using Backend.Api.Middleware.ExceptionHandlerMiddleware;
+using Backend.Domain.Models;
 using Backend.Infrastructure.Context;
-using Backend.Middleware;
 using Scalar.AspNetCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
-
+Console.WriteLine("Environment: " + builder.Environment.EnvironmentName);
+Console.WriteLine("ContentRoot: " + builder.Environment.ContentRootPath);
+Console.WriteLine("ConnectionString: " + builder.Configuration.GetConnectionString("DefaultConnection"));
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
@@ -31,7 +33,8 @@ builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 
 //register exception handler
-builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddExceptionHandler<BadRequestExceptionHandler>();
+builder.Services.AddExceptionHandler<NotFoundExceptionHandler>();
 builder.Services.AddProblemDetails();
 
 var app = builder.Build();
