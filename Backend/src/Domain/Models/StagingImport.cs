@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
-namespace Backend.Domains;
+
+namespace Backend.Domain.Models;
 
 public class StagingImport
 {

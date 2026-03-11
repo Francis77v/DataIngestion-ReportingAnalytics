@@ -1,6 +1,6 @@
 using MediatR;
 
-namespace Backend.Features.Users.CreateUsers;
+namespace Backend.Application.Features.Users.CreateUsers;
 
 public record CreateUserCommand(string FullName,
     string Email,

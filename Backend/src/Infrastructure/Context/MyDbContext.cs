@@ -1,4 +1,5 @@
-﻿using Backend.Domains;
+﻿using Backend.Domain;
+using Backend.Domain.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;

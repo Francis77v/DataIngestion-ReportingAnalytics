@@ -1,7 +1,7 @@
-namespace Backend.Middleware;
-
 using FluentValidation;
 using MediatR;
+
+namespace Backend.Api.Middleware;
 
 public class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IRequest<TResponse>
