@@ -35,6 +35,7 @@ builder.Services.AddMediatR(cfg =>
 //register exception handler
 builder.Services.AddExceptionHandler<BadRequestExceptionHandler>();
 builder.Services.AddExceptionHandler<NotFoundExceptionHandler>();
+builder.Services.AddExceptionHandler<UnauthorizedExceptionHandler>();
 builder.Services.AddProblemDetails();
 
 var app = builder.Build();
@@ -53,7 +54,7 @@ app.UseAuthorization();
 
 app.UseExceptionHandler();
 
-app.CreateUser();
+app.ExceptionHandlerEndpoint();
 
 app.Run();
 
