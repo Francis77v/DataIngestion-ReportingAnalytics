@@ -7,4 +7,4 @@ public record CreateUserCommand(string FullName,
     string Username,
     string Password,
     string ConfirmPassword
-) : IRequest<string>;
+) : IRequest<CreateUserResponse>;
