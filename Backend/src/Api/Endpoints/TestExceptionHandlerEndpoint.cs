@@ -1,6 +1,6 @@
 using Backend.Domain.Exceptions;
 
-namespace Backend.Api.Middleware.Endpoints;
+namespace Backend.Api.Endpoints;
 
 public static class TestExceptionHandlerEndpoint
 {
