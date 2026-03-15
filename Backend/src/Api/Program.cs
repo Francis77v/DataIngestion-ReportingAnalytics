@@ -1,7 +1,11 @@
-using Backend.Api.Middleware.Endpoints;
+using Backend.Api.Endpoints;
+using Backend.Api.Middleware;
 using Backend.Api.Middleware.ExceptionHandlerMiddleware;
+using Backend.Application.Features.Users.CreateUsers;
 using Backend.Domain.Models;
 using Backend.Infrastructure.Context;
+using FluentValidation;
+using MediatR;
 using Scalar.AspNetCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -32,6 +36,10 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
 builder.Services.AddMediatR(cfg => 
     cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 
+//REGISTER FLUENT VALIDATION + MEDIATR VALIDATION PIPELINE
+builder.Services.AddTransient<IValidator<CreateUserCommand>, CreateUserCommandValidator>();
+builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+
 //register exception handler
 builder.Services.AddExceptionHandler<BadRequestExceptionHandler>();
 builder.Services.AddExceptionHandler<NotFoundExceptionHandler>();
@@ -54,7 +62,8 @@ app.UseAuthorization();
 
 app.UseExceptionHandler();
 
+//Endpoints
 app.ExceptionHandlerEndpoint();
+app.MapCreateUserEndpoint();
 
 app.Run();
-
